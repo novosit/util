@@ -60,9 +60,9 @@ define([
 							}
 						}
 					}else{
-						for(var deps = module.deps, i = 0; deps && i<deps.length; i++) {
-							if (deps[i]) {
-								traverse(deps[i++]);
+						for(var deps = module.deps, i = 0; deps && i<deps.length; i++){
+							if (deps[i]){
+								traverse(deps[i]);
 							}
 						}
 					}
@@ -269,10 +269,8 @@ define([
 					resource.deps = [];
 				}
 				var layerDeps = resource.layer.layerDependencies;
-				for (var cnt = 0; cnt < layerDeps.length; cnt += 1) {
-					var childModule = {
-						mid: layerDeps[cnt]
-					};
+				for (var cnt=0;cnt < layerDeps.length; cnt += 1){
+					var childModule = { mid: layerDeps[cnt] };
 					resource.deps.push(childModule);
 				}
 			}
