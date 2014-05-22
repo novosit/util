@@ -304,8 +304,18 @@ define([
 					pack:moduleInfo.pack,
 					deps:[],
 					text:"define([], 1);" + bc.newline,
-					getText:function(){
-						return this.text;
+					getText: function() {
+						if (this.deps && this.deps.length) {
+							var arr = [],
+								cnt;
+							for (cnt = 0; cnt < this.deps.length; cnt += 1) {
+								arr.push(this.deps[cnt].mid);
+							}
+							this.text = "define([\"" + arr.join("\",\"") + "\", \"dojo/domReady!\"], 1);" + bc.newline;
+							return this.text;
+						} else {
+							return this.text;
+						}
 					},
 					encoding:"utf8"
 				};

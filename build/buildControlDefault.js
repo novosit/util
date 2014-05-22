@@ -87,7 +87,10 @@ define([
 			"dojo/domReady":"build/plugins/domReady",
 			"dojo/loadInit":"build/plugins/loadInit",
 			"dojo/require":"build/plugins/require",
-			"dojo/selector/_loader":"build/plugins/querySelector"
+			"dojo/selector/_loader":"build/plugins/querySelector",
+			"ninejs/css/style":"ninejs/css/build/dojo-amd",
+			"ninejs/css":"ninejs/css/build/dojo-amd",
+			"ninejs/nineplate":"ninejs/nineplate/build/dojo-amd"
 		},
 
 		gates:[
@@ -109,6 +112,7 @@ define([
 		transforms:{
 			trace:				["build/transforms/trace", "read"],
 			read:				["build/transforms/read", "read"],
+			wrapAmdIife:		["build/transforms/wrapAmdIife", "read"],
 			dojoPragmas:		["build/transforms/dojoPragmas", "read"],
 			insertSymbols:		["build/transforms/insertSymbols", "read"],
 			depsDeclarative:	["build/transforms/depsDeclarative", "read"],
@@ -211,6 +215,16 @@ define([
 				},
 				// just like regular AMD modules (the next transform job), but without a bunch of unneeded transforms
 				["writeAmd", "writeOptimized"]
+			],[
+				// Forced AMD module: 'wrapAmdIife'
+				function(resource, bc){
+					if(resource.tag.wrapAmdIife){
+						bc.amdResources[resource.mid] = resource;
+						return true;
+					}
+					return false;
+				},
+				["read", "wrapAmdIife", "dojoPragmas", "hasFindAll", "insertSymbols", "hasFixup", "depsScan", "writeAmd", "writeOptimized"]
 			],[
 				// AMD module:
 				// already marked as an amd resource

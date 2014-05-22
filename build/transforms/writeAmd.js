@@ -36,6 +36,9 @@ define([
 				visited,
 				includePhase,
 				traverse = function(module){
+					if (!module) {
+						return;
+					}
 					var mid = module.mid;
 
 					if(visited[mid]){
@@ -57,7 +60,10 @@ define([
 							}
 						}
 					}else{
-						for(var deps = module.deps, i = 0; deps && i<deps.length; traverse(deps[i++])){
+						for(var deps = module.deps, i = 0; deps && i<deps.length; i++) {
+							if (deps[i]) {
+								traverse(deps[i++]);
+							}
 						}
 					}
 				};
@@ -258,6 +264,18 @@ define([
 					})) + "']);}" + newline);
 			}
 
+			if (resource.layer.layerDependencies) {
+				if (!resource.deps) {
+					resource.deps = [];
+				}
+				var layerDeps = resource.layer.layerDependencies;
+				for (var cnt = 0; cnt < layerDeps.length; cnt += 1) {
+					var childModule = {
+						mid: layerDeps[cnt]
+					};
+					resource.deps.push(childModule);
+				}
+			}
 			// construct the cache text
 			if(cache.length && resource.layer.noref){
 				cache.push("'*noref':1");
@@ -274,7 +292,7 @@ define([
 				cache = [],
 				newline = bc.newline;
 			resource.deps && resource.deps.forEach(function(dep){
-				if(dep.internStrings){
+				if(dep && dep.internStrings){
 					pushString(strings, dep.internStrings());
 				}
 			});
