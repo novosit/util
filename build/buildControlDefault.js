@@ -88,8 +88,8 @@ define([
 			"dojo/loadInit":"build/plugins/loadInit",
 			"dojo/require":"build/plugins/require",
 			"dojo/selector/_loader":"build/plugins/querySelector",
-			"ninejs/css/style":"ninejs/css/build/dojo-amd",
-			"ninejs/css":"ninejs/css/build/dojo-amd",
+			"ninejs/css/style":"ninejs/_css/build/dojo-amd",
+			"ninejs/css":"ninejs/_css/build/dojo-amd",
 			"ninejs/nineplate":"ninejs/nineplate/build/dojo-amd"/*,
 			"xstyle/css":"xstyle/build/amd-css"*/
 		},
