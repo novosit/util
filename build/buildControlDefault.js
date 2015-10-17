@@ -90,7 +90,7 @@ define([
 			"dojo/selector/_loader":"build/plugins/querySelector",
 			"ninejs/css/style":"ninejs/_css/build/dojo-amd",
 			"ninejs/css":"ninejs/_css/build/dojo-amd",
-			"ninejs/nineplate":"ninejs/nineplate/build/dojo-amd"/*,
+			"ninejs/nineplate":"ninejs/_nineplate/build/dojo-amd"/*,
 			"xstyle/css":"xstyle/build/amd-css"*/
 		},
 
@@ -121,7 +121,7 @@ define([
 			hasFixup:			["build/transforms/hasFixup", "ast"],
 			write:				["build/transforms/write", "write"],
 			writeAmd:			["build/transforms/writeAmd", "write"],
-			writeOptimized: 	["build/transforms/writeOptimized", "write"],
+			//writeOptimized: 	["build/transforms/writeOptimized", "write"],
 			copy:				["build/transforms/copy", "write"],
 			writeDojo:			["build/transforms/writeDojo", "write"],
 			optimizeCss:		["build/transforms/optimizeCss", "optimize"],
@@ -165,7 +165,7 @@ define([
 					}
 					return false;
 				},
-				["read", "dojoPragmas", "hasFindAll", "hasFixup", "writeDojo", "writeOptimized"]
+				["read", "dojoPragmas", "hasFindAll", "hasFixup", "writeDojo"/*, "writeOptimized"*/]
 			],[
 				// package has module
 				function(resource, bc){
@@ -175,13 +175,13 @@ define([
 					}
 					return false;
 				},
-				["read", "dojoPragmas", "hasFindAll", "hasFixup", "depsScan", "writeAmd", "writeOptimized", "hasReport", "depsDump"]
+				["read", "dojoPragmas", "hasFindAll", "hasFixup", "depsScan", "writeAmd"/*, "writeOptimized"*/, "hasReport", "depsDump"]
 			],[
 				// flattened nls bundles
 				function(resource, bc){
 					return !!resource.tag.flattenedNlsBundle;
 				},
-				["writeAmd", "writeOptimized"]
+				["writeAmd"/*, "writeOptimized"*/]
 			],[
 				// nls resources
 				function(resource, bc){
@@ -192,7 +192,7 @@ define([
 					}
 					return false;
 				},
-				["read", "dojoPragmas", "hasFindAll", "hasFixup", "depsScan", "writeAmd", "writeOptimized"]
+				["read", "dojoPragmas", "hasFindAll", "hasFixup", "depsScan", "writeAmd"/*, "writeOptimized"*/]
 			],[
 				// synthetic AMD modules (used to create layers on-the-fly
 				function(resource, bc){
@@ -203,7 +203,7 @@ define([
 					return false;
 				},
 				// just like regular AMD modules, but without a bunch of unneeded transforms
-				["depsScan", "writeAmd", "writeOptimized"]
+				["depsScan", "writeAmd"/*, "writeOptimized"*/]
 			],[
 				// synthetic dojo/loadInit! resources
 				// FIXME: can't this be added to the previous transform?
@@ -215,7 +215,7 @@ define([
 					return false;
 				},
 				// just like regular AMD modules (the next transform job), but without a bunch of unneeded transforms
-				["writeAmd", "writeOptimized"]
+				["writeAmd"/*, "writeOptimized"*/]
 			],[
 				// Forced AMD module: 'wrapAmdIife'
 				function(resource, bc){
@@ -225,7 +225,7 @@ define([
 					}
 					return false;
 				},
-				["read", "wrapAmdIife", "dojoPragmas", "hasFindAll", "insertSymbols", "hasFixup", "depsScan", "writeAmd", "writeOptimized"]
+				["read", "wrapAmdIife", "dojoPragmas", "hasFindAll", "insertSymbols", "hasFixup", "depsScan", "writeAmd"/*, "writeOptimized"*/]
 			],[
 				// AMD module:
 				// already marked as an amd resource
@@ -238,7 +238,7 @@ define([
 					}
 					return false;
 				},
-				["read", "dojoPragmas", "hasFindAll", "insertSymbols", "hasFixup", "depsScan", "writeAmd", "writeOptimized"]
+				["read", "dojoPragmas", "hasFindAll", "insertSymbols", "hasFixup", "depsScan", "writeAmd"/*, "writeOptimized"*/]
 			],[
 				// Declarative Resource:
 				// This resource (usually HTML) should be scanned for declarative dependencies and copied.
