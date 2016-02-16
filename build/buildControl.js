@@ -540,7 +540,7 @@ define([
 	bc.layerOptimize = fixupOptimize(bc.layerOptimize);
 
 	(function(){
-		var fixedScopeMap = {dojo:"dojo", dijit:"dijit", dojox:"dojox"};
+		var fixedScopeMap = {/*dojo:"dojo", dijit:"dijit", dojox:"dojox"*/};
 		(bc.scopeMap || []).forEach(function(pair){
 			if(!pair[1]){
 				delete fixedScopeMap[pair[0]];
