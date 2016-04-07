@@ -214,10 +214,17 @@ define([
 			var newline = bc.newline,
 				rootBundles = [],
 				strings = {},
-				cache = [],
+				cache,
 				layer = resource.layer,
 				moduleSet = computeLayerContents(resource, layer.include, layer.exclude),
-				includeLocales = "includeLocales" in layer ? layer.includeLocales : bc.includeLocales;			
+				includeLocales = "includeLocales" in layer ? layer.includeLocales : bc.includeLocales;
+			var isDojo = layer.amdTarget === 'dojo';
+			if (isDojo) {
+				cache = [];
+			}
+			else {
+				cache = {};
+			}
 			for(var p in moduleSet){
 				// always put modules!=resource in the cache; put resource in the cache if it's a boot layer and an explicit resourceText wasn't given
 				if(p!=resource.mid || resourceText===false){
@@ -229,7 +236,12 @@ define([
 						rootBundles.push(module);
 						if(includeLocales){
 							// include the ROOT always
-							cache.push("'" + p + "':function(){" + newline + module.getText() + newline + "}");
+							if (isDojo) {
+								cache.push("'" + p + "':function(){" + newline + module.getText() + newline + "}");
+							}
+							else {
+								cache[p] = module.getText();
+							}
 							// now include each locale in the layer
 							includeLocales.forEach(function(locale){
 								var parts = locale.split("-");
@@ -238,7 +250,12 @@ define([
 									// see if the localized set is there
 									if(localizedSet){
 										// put the bundle in the cache
-										cache.push("'" + localizedSet.mid + "':function(){" + newline + localizedSet.getText() + newline + "}");
+										if (isDojo) {
+											cache.push("'" + localizedSet.mid + "':function(){" + newline + localizedSet.getText() + newline + "}");
+										}
+										else {
+											cache[localizedSet.mid] = localizedSet;
+										}
 									}
 								}
 							});
@@ -246,7 +263,12 @@ define([
 					}else if(module.internStrings){
 						pushString(strings, module.internStrings());
 					}else if(module.getText){
-						cache.push("'" + p + "':function(){" + newline + module.getText() + newline + "}");
+						if (isDojo) {
+							cache.push("'" + p + "':function(){" + newline + module.getText() + newline + "}");
+						}
+						else {
+							cache[p] = module;
+						}
 					}else{
 						bc.log("amdMissingLayerModuleText", ["module", module.mid, "layer", resource.mid]);
 					}
@@ -278,7 +300,37 @@ define([
 			if(cache.length && resource.layer.noref){
 				cache.push("'*noref':1");
 			}
-			return	(cache.length ? "require({cache:{" + newline + cache.join("," + newline) + "}});" + newline : "") +
+
+			var modulesString;
+			if (isDojo) {
+				modulesString = (cache.length ? "require({cache:{" + newline + cache.join("," + newline) + "}});" + newline : "");
+			}
+			else {
+				modulesString = Object.keys(cache).map(function (k) {
+					var item = cache[k];
+					if (item.getText) {
+						item = item.getText().replace(/define\s*\((\s*)((\[)|(function)|([^),]+(,[^),]+)*))/, function (total, $1, $2, $3, $4, $5, $6) {
+							if ($3) {
+								return "define(\"" + k + "\", [";
+							}
+							else if ($4) {
+								return "define(\"" + k + "\", [], function";
+							}
+							else if ($5) {
+								if ($6) {
+									return "define(\"" + k + "\", " + $5;
+								}
+								else {
+									return "define(\"" + k + "\", [], " + $5;
+								}
+							}
+						}).replace(/\/\/\# sourceMappingURL=(.+).js.map/, "");
+					}
+					return item;
+				}).join("\n");
+			}
+
+			return	modulesString +
 				(resourceText===undefined ?	 insertAbsMid(resource.getText(), resource) : (resourceText==false ? "" : resourceText)) +
 				(resource.layer.postscript ? resource.layer.postscript : "");
 		},
@@ -302,7 +354,7 @@ define([
 			resource
 		){
 			if((resource.layer && bc.layerOptimize) || (!resource.layer && bc.optimize)){
-				return resource.dest + ".uncompressed.js";
+				return resource.dest;// + ".uncompressed.js";
 			}
 			return resource.dest;
 		},

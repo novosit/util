@@ -187,7 +187,7 @@ function release(){
 		fileContents = i18nUtil.flattenLayerFileBundles(fileName, fileContents, kwArgs);
 
 		//Save uncompressed file.
-		var uncompressedFileName = fileName + ".uncompressed.js";
+		var uncompressedFileName = fileName + /*".uncompressed*/".js";
 		var uncompressedContents = layerLegalText + fileContents;
 		if(layerName.match(/\.xd\.js$/) && !layerName.match(/dojo(\.xd)?\.js/)){
 			uncompressedContents = buildUtilXd.makeXdContents(uncompressedContents, prefixes, kwArgs);
