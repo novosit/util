@@ -254,15 +254,22 @@ define([
 			}
 			appendStringsToCache(strings, cache);
 
+			var layerVarName = "_" +  resource.layer.name.replace(new RegExp('/', 'g'),"_") + "LayerResolve";
+
 			// compute the flattened layer bundles (if any)
 			if(rootBundles.length){
 				getFlattenedBundles(resource, rootBundles);
 				// push an *now into the cache that causes the flattened layer bundles to be loaded immediately
-				cache.push("'*now':function(r){r(['dojo/i18n!*preload*" + getPreloadL10nRootPath(resource.mid) + "*" + 
+				cache.push("'*now': function(r){\n  if (!"+layerVarName+") {\n    "+layerVarName+" = 1;\n  } else if (typeof("+layerVarName+") === 'function') {\n    "+layerVarName+"();\n  }\n  r(['dojo/i18n!*preload*" + getPreloadL10nRootPath(resource.mid) + "*" + 
 					json.stringify(bc.localeList.filter(function(locale){
 						return !includeLocales || (includeLocales.indexOf(locale) == -1 && locale != "ROOT");
 					})) + "']);}" + newline);
 			}
+
+			var preText = "";
+			var postText = "var "+ layerVarName +";\ndefine(\"" + resource.layer.name + "\", " + ((resource.layer.layerDependencies && resource.layer.layerDependencies.length)? ("[\"" + (resource.layer.layerDependencies || []).join("\", \"") +"\"]"):"[]") + ", function () {\n" + 
+			"return Array.prototype.reduce.call(arguments, function (acc, next) {\n    return acc.then(function () {\n      return next;\n    });\n  }, Promise.resolve(null)).then(function () {\n"+
+		    "    return new Promise(function (__resolve) {\n      if ("+ layerVarName +") {\n        __resolve();\n      } else {\n      "+ layerVarName +" = __resolve;\n      }\n    });\n  });\n});";
 
 			if (resource.layer.layerDependencies) {
 				if (!resource.deps) {
@@ -272,15 +279,16 @@ define([
 				for (var cnt=0;cnt < layerDeps.length; cnt += 1){
 					var childModule = { mid: layerDeps[cnt] };
 					resource.deps.push(childModule);
-				}
+				}				
 			}
 			// construct the cache text
 			if(cache.length && resource.layer.noref){
 				cache.push("'*noref':1");
 			}
-			return	(cache.length ? "require({cache:{" + newline + cache.join("," + newline) + "}});" + newline : "") +
-				(resourceText===undefined ?	 insertAbsMid(resource.getText(), resource) : (resourceText==false ? "" : resourceText)) +
-				(resource.layer.postscript ? resource.layer.postscript : "");
+
+			return	preText + (cache.length ? "require({cache:{" + newline + cache.join("," + newline) + "}});" + newline : "") +
+//				(resourceText===undefined ?	 insertAbsMid(resource.getText(), resource) : (resourceText==false ? "" : resourceText)) +
+				/*(resource.layer.postscript ? resource.layer.postscript : "") + */ postText;
 		},
 
 		getStrings = function(
